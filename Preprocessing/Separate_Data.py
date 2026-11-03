@@ -52,7 +52,7 @@ def mix_noise_at_snr(clean_y:np.ndarray, noise_y: np.ndarray, target_snr_db: flo
     
     target_noise_rms = clean_rms/(10.0**(target_snr_db/20.0))
     
-    mixed_y = target_noise_rms * noise_y + clean_y
+    mixed_y = (target_noise_rms/noise_rms) * noise_y + clean_y
     peak = np.max(np.abs(mixed_y))
     if(peak > 0.99):
         return mixed_y*(0.95/peak)
@@ -118,7 +118,7 @@ def process_split_file(file_path: pathlib.Path, split_name: str, output_base_dir
         origin_file = split_dir/ file_path.name
         shutil.copy2(file_path, origin_file)
         # 2. CHỈ KHI split_name == "train": Thực hiện Augmentation và lưu thêm file mới
-        if split_name == "train" and file_path.name.startswith("cry_"):
+        if split_name == "train" and file_path.name.startswith("Cry_"):
             y, sr = sf.read(file_path, dtype="float32")
             # TODO: [Sáng tạo của bạn]
             # - Khởi tạo rng = np.random.default_rng(seed)

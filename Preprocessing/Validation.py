@@ -130,7 +130,7 @@ def process_single_file(file_path: pathlib.Path, output_dir: pathlib.Path):
         else:
             y_active = np.concatenate([y[start:end] for start, end in intervals])
         
-        is_cry = file_path.name.startswith("cry_")
+        is_cry = file_path.name.startswith("Cry_")
         for start in range(0, len(y_active) - WINDOW_SAMPLE + 1 , HOP_SAMPLE):
             y_win = y_active[start: start+WINDOW_SAMPLE]
             metrics = calculate_window_metrics(y_win)
@@ -152,8 +152,7 @@ def main(standardized_input_dir: str, windows_output_dir: str):
     output = pathlib.Path(windows_output_dir)
     output.mkdir(parents=True, exist_ok=True)
     wav_files = sorted(list(p for p in input.rglob("*.wav")))
-    for file_path in wav_files:
-        process_single_file(file_path, output)
+    Parallel(n_jobs=-1, verbose=5)(delayed(process_single_file)(file_path,output) for file_path in wav_files)
 
 
 if __name__ == "__main__":

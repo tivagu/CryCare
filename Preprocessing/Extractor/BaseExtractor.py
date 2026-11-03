@@ -61,7 +61,7 @@ class MelSpectrogramExtractor(BaseExtractor):
     
     def extractor(self, y:np.ndarray):
         y_padded, power_spec = self.Validation_SFTF(y)
-        mels_spectrogram = librosa.feature.melspectrogram(S=power_spec, n_mels=self.n_mels, fmin= self.f_min, fmax= self.f_max, htk=True)
+        mels_spectrogram = librosa.feature.melspectrogram(S=power_spec, sr= self.sr,n_mels=self.n_mels, fmin= self.f_min, fmax= self.f_max, htk=True)
         Log_Mels = 10*np.log10(np.maximum(mels_spectrogram, 1e-6))
         
         return Log_Mels[..., np.newaxis]

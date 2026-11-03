@@ -14,7 +14,7 @@ from joblib import Parallel, delayed
 import numpy as np
 import soundfile as sf
 import librosa
-from Preprocessing.Extractor.BaseExtractor import MelSpectrogramExtractor, MFCCExtractor
+from CryCare.Preprocessing.Extractor.BaseExtractor import MelSpectrogramExtractor, MFCCExtractor
 
 
 # ==============================================================================
