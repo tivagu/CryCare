@@ -14,7 +14,7 @@ from joblib import Parallel, delayed
 import numpy as np
 import soundfile as sf
 import librosa
-from CryCare.Preprocessing.Extractor.BaseExtractor import MelSpectrogramExtractor, MFCCExtractor
+from Extractor.BaseExtractor import MelSpectrogramExtractor, MFCCExtractor
 
 
 # ==============================================================================
@@ -52,9 +52,9 @@ def process_single_file_features(wav_path: pathlib.Path, split_name: str, label:
 # TẦNG 3: HÀM ĐIỀU PHỐI CHÍNH (MAIN)
 # ==============================================================================
 
-def main(step3_output_dir: str, features_output_dir: str):
+def Exported_Feature(step3_output_dir: str, features_output_dir: str|None = None):
     in_dir = pathlib.Path(step3_output_dir)
-    out_dir = pathlib.Path(features_output_dir)
+    out_dir = pathlib.Path(features_output_dir) if features_output_dir else (in_dir.parent / "04_Featured")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Thu thập danh sách các task từ 3 thư mục: train, valid, test
@@ -102,7 +102,7 @@ def main(step3_output_dir: str, features_output_dir: str):
     #    mel_std  = float(np.std(X_2d_train) + 1e-8)
     #    Áp dụng công thức (X - mel_mean) / mel_std cho cả train, valid, test!
     mel_mean = float(np.mean(X_2d_train))
-    mel_std = float(np.mean(X_2d_train + 1e-8))
+    mel_std = float(np.std(X_2d_train) + 1e-8)
     X_2d_train_norm = (X_2d_train - mel_mean)/mel_std
     X_2d_valid_norm = (X_2d_valid - mel_mean)/mel_std
     X_2d_test_norm = (X_2d_test-mel_mean)/mel_std
@@ -149,9 +149,10 @@ def main(step3_output_dir: str, features_output_dir: str):
     with open(out_dir / "esp32_dsp_config.json", "w", encoding="utf-8") as f:
             json.dump(dsp_config, f, indent=2)
     print(f"Hoàn thành Step 4! Đã lưu đặc trưng vào: {out_dir}")
+    return out_dir
 
 
 if __name__ == "__main__":
-    INPUT_STEP3 = r"D:\2026-2027\CryCare\Implementation\output\out_Step3"
-    OUTPUT_STEP4 = r"D:\2026-2027\CryCare\Implementation\output\Output_step4"
-    main(INPUT_STEP3, OUTPUT_STEP4)
+    INPUT_STEP3 = r"D:\2026-2027\CryCare\Implementation\output\Separate"
+    OUTPUT_STEP4 = r"D:\2026-2027\CryCare\Implementation\output\Feature"
+    Exported_Feature(INPUT_STEP3, OUTPUT_STEP4)

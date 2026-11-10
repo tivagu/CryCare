@@ -12,7 +12,7 @@ from joblib import Parallel, delayed
 import numpy as np
 import soundfile as sf
 from sklearn.model_selection import GroupShuffleSplit
-
+import pandas as pd
 
 Target_SR = 16000
 SEED = 42
@@ -108,6 +108,7 @@ def process_split_file(file_path: pathlib.Path, split_name: str, output_base_dir
     Đầu vào: 1 đường dẫn file_path, tên tập ("train", "val", hoặc "test"), thư mục đích, và seed
     Đầu ra: Dict trạng thái xử lý của file đó
     """
+    records = []
     try:
         # Tạo thư mục con: output_base_dir / split_name (VD: out_Step3/train)
         split_dir = output_base_dir / split_name
@@ -117,6 +118,8 @@ def process_split_file(file_path: pathlib.Path, split_name: str, output_base_dir
         # TODO: Đọc y, sr bằng sf.read() và lưu bản gốc (hoặc dùng shutil.copy2)
         origin_file = split_dir/ file_path.name
         shutil.copy2(file_path, origin_file)
+        label = 1 if file_path.name.startswith("Cry_") else 0
+        records.append({"file_name": origin_file.name, "label": label, "split": split_name})
         # 2. CHỈ KHI split_name == "train": Thực hiện Augmentation và lưu thêm file mới
         if split_name == "train" and file_path.name.startswith("Cry_"):
             y, sr = sf.read(file_path, dtype="float32")
@@ -134,28 +137,35 @@ def process_split_file(file_path: pathlib.Path, split_name: str, output_base_dir
             # - Lưu file mới với tên: f"{file_path.stem}_aug.wav" bằng sf.write(..., subtype="PCM_16")
             output_file = split_dir/f"{file_path.stem}_aug.wav"
             sf.write(str(output_file), mixed_noise,Target_SR, subtype="PCM_16")
-        return {"file": file_path.name, "split": split_name, "status": "ok"}
+            records.append({"file_name": origin_file.name, "label": label, "split": split_name})
+        return records
     except Exception as e:
-        return {"file": file_path.name, "split": split_name, "status": f"error: {e}"}
+        return []
     
 
-def main(input: pathlib.Path, output: pathlib.Path):
+def Separate_Dataset(input: pathlib.Path, output: pathlib.Path|None = None):
     indir = pathlib.Path(input)
-    outdir = pathlib.Path(output)
+    output_dir = pathlib.Path(output) if output else (indir.parent / "03_Separate")
     wav_files = sorted(list(indir.rglob("*.wav")))
-    outdir.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
     train_files, valid_files, test_files = split_by_parent_group(wav_files)
     group = {"train":train_files,
              "valid": valid_files,
              "test": test_files}
-    Parallel(n_jobs=-1)(delayed(process_split_file)(p, split_name,outdir, 42+idx)for split_name, file_list in group.items() for idx, p in enumerate(file_list))
+    nested_res = Parallel(n_jobs=-1, verbose=5)(delayed(process_split_file)(p, split_name,output_dir, 42+idx)for split_name, file_list in group.items() for idx, p in enumerate(file_list))
+    items = [item for sublist in nested_res if sublist for item in sublist]
+    df = pd.DataFrame(items)
+    for split_name in ["train", "valid", "test"]:
+        df_split = df[df["split"] == split_name][["file_name", "label"]].reset_index(drop=True)
+        df_split.to_csv(output_dir / f"{split_name}.csv", index=True, index_label="index")
+    return output_dir
 
 
 
 if __name__ == "__main__":
-    input = r"D:\2026-2027\CryCare\Implementation\output\out_test2"
-    output = r"D:\2026-2027\CryCare\Implementation\output\out_Step3"
-    main(input, output)
+    input = r"D:\2026-2027\CryCare\Implementation\output\Validation"
+    output = r"D:\2026-2027\CryCare\Implementation\output\Separate"
+    Separate_Dataset(input, output)
     
     
     

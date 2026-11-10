@@ -43,8 +43,8 @@ class MFCCExtractor(BaseExtractor):
         mfcc = librosa.feature.mfcc(S=Log_Mels, sr= self.sr, n_mfcc=self.n_mfcc)
         delta = librosa.feature.delta(mfcc)
         flatness=librosa.feature.spectral_flatness(S=np.sqrt(power_spec))
-        centroid = librosa.feature.spectral_centroid(S=np.sqrt(power_spec))
-        rolloff = librosa.feature.spectral_rolloff(S=np.sqrt(power_spec))
+        centroid = librosa.feature.spectral_centroid(S=np.sqrt(power_spec), sr=self.sr)
+        rolloff = librosa.feature.spectral_rolloff(S=np.sqrt(power_spec), sr=self.sr)
         crossing_rate = librosa.feature.zero_crossing_rate(y=y_padded, frame_length=self.n_fft, hop_length=self.hop_length)
         
         stacked = np.vstack([mfcc,delta,centroid,rolloff, flatness,crossing_rate])
