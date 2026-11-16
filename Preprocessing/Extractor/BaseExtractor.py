@@ -39,8 +39,7 @@ class MFCCExtractor(BaseExtractor):
     def extractor(self, y: np.ndarray):
         y_padded, power_spec = self.Validation_SFTF(y)
         mel_spectrogram = librosa.feature.melspectrogram(S=power_spec, sr=self.sr, n_mels=self.n_mels, fmin=self.f_min, fmax=self.f_max, htk=True)
-        Log_Mels = 10*np.log10(np.maximum(mel_spectrogram, 1e-6))
-        mfcc = librosa.feature.mfcc(S=Log_Mels, sr= self.sr, n_mfcc=self.n_mfcc)
+        mfcc = librosa.feature.mfcc(S=librosa.power_to_db(mel_spectrogram), sr= self.sr, n_mfcc=self.n_mfcc)
         delta = librosa.feature.delta(mfcc)
         flatness=librosa.feature.spectral_flatness(S=np.sqrt(power_spec))
         centroid = librosa.feature.spectral_centroid(S=np.sqrt(power_spec), sr=self.sr)

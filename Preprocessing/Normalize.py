@@ -8,7 +8,7 @@ from joblib import Parallel, delayed
 import pathlib
 from Subclass.BaseAudioLoader import CotainerLoader, FileLoader
 import pandas as pd
-Valid = {".wav", ".mp3", ".mp4", ".flac", ".ogg", ".m4a"}
+Valid = {".wav", ".mp3", ".mp4", ".flac", ".ogg", ".m4a", ".webm"}
 Compressed = {".wav", ".flac", ".ogg"}
 Target_SR = 16000
 targer_hash = 65536

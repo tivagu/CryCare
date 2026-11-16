@@ -121,7 +121,7 @@ def process_split_file(file_path: pathlib.Path, split_name: str, output_base_dir
         label = 1 if file_path.name.startswith("Cry_") else 0
         records.append({"file_name": origin_file.name, "label": label, "split": split_name})
         # 2. CHỈ KHI split_name == "train": Thực hiện Augmentation và lưu thêm file mới
-        if split_name == "train" and file_path.name.startswith("Cry_"):
+        if split_name == "train":
             y, sr = sf.read(file_path, dtype="float32")
             # TODO: [Sáng tạo của bạn]
             # - Khởi tạo rng = np.random.default_rng(seed)
@@ -137,7 +137,7 @@ def process_split_file(file_path: pathlib.Path, split_name: str, output_base_dir
             # - Lưu file mới với tên: f"{file_path.stem}_aug.wav" bằng sf.write(..., subtype="PCM_16")
             output_file = split_dir/f"{file_path.stem}_aug.wav"
             sf.write(str(output_file), mixed_noise,Target_SR, subtype="PCM_16")
-            records.append({"file_name": origin_file.name, "label": label, "split": split_name})
+            records.append({"file_name": output_file.name, "label": label, "split": split_name})
         return records
     except Exception as e:
         return []
@@ -163,7 +163,7 @@ def Separate_Dataset(input: pathlib.Path, output: pathlib.Path|None = None):
 
 
 if __name__ == "__main__":
-    input = r"D:\2026-2027\CryCare\Implementation\output\Validation"
+    input = r"D:\2026-2027\CryCare\Implementation\output\02_Validation"
     output = r"D:\2026-2027\CryCare\Implementation\output\Separate"
     Separate_Dataset(input, output)
     

@@ -11,9 +11,9 @@ class BaseAudioLoader(ABC):
     def load_normalize(self, file_Path: pathlib.Path) -> np.ndarray:
         y = self.decode_to_mono_16k(file_Path)
         
-        y = y - np.mean(y)
-        
         y = librosa.util.normalize(y) * 0.95
+        
+        y = y - np.mean(y)
         
         return y.astype(np.float32) 
     @abstractmethod
