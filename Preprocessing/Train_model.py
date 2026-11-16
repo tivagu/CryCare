@@ -16,7 +16,7 @@ from sklearn.metrics import(
     confusion_matrix
 )
 import matplotlib.pyplot as plt
-from Model.BaseLineModel import LogisticModel, BaseLineModel
+from CryCare.Preprocessing.Model.BaseLineModel import LogisticModel, BaseLineModel
 def load_data(feature_dir: str|pathlib.Path, feature_type: str = "1d"):
     feat_path = pathlib.Path(feature_dir)
     X_train = np.load(feat_path/f"X_train_{feature_type}.npy")
