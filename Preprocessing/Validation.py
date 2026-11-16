@@ -17,12 +17,12 @@ TARGET_WINDOW_DURATION_SEC = 2.0
 WINDOW_SAMPLE = int(TARGET_SR*TARGET_WINDOW_DURATION_SEC)
 HOP_SAMPLE = int(TARGET_SR*1.0)
 
-MIN_DBFS = -45.0
+MIN_DBFS = -50.0
 MAX_CLIP_RATIO = 0.05
 MIN_SNR_DB = 3.0
-MAX_SPECTRAL_FLATNESS = 0.35
-MIN_CRY_BAND_RATIA = 0.30
-
+MAX_SPECTRAL_FLATNESS = 0.5
+MIN_CRY_BAND_RATIA = 0.85
+MAX_ADULT_RATIO = 0.25
 Valid = {".wav", ".mp3", ".mp4", ".flac", ".ogg", ".m4a"}
 
 # TẦNG 1: HÀM TÍNH TOÁN CHỈ SỐ CỦA 1 CỬA SỔ
@@ -64,16 +64,19 @@ def calculate_window_metrics(y_win: np.ndarray, sr: int = TARGET_SR) -> dict:
     
     #FFT
     rfft = np.fft.rfft(y_win)
-    freq = np.fft.rfftfreq(n=len(y_win), d = 1.0/sr)
-    band_mask = (freq >= 300.0) & (freq <3500.0)
     power_spec = np.abs(rfft) ** 2
-    cry_ratio = np.sum(power_spec[band_mask]) / (np.sum(power_spec) + 1e-8)
+    freq = np.fft.rfftfreq(n=len(y_win), d = 1.0/sr)
+    adult_mask = (freq >= 80.0) & (freq < 300.0)
+    adult_ratio = (np.sum(power_spec[adult_mask]))/ (np.sum(power_spec)+ 1e-8)
+    baby_mask = (freq >= 400.0) & (freq <3500.0)
+    cry_ratio = np.sum(power_spec[baby_mask]) / (np.sum(power_spec) + 1e-8)
     return {"rms": round(float(rms), 6),
             "dbfs": round(float(dbfs),2),
             "clip_ratio": round(float(ratio), 4),
             "snr_db": round(float(snr_db), 2),
             "flatness": round(float(flatness), 4),
-            "cry_ratio": round(float(cry_ratio), 4)
+            "cry_ratio": round(float(cry_ratio), 4),
+            "adult_ratio": round(float(adult_ratio),4)
             }
 
     
@@ -84,7 +87,7 @@ def calculate_window_metrics(y_win: np.ndarray, sr: int = TARGET_SR) -> dict:
 # TẦNG 2: HÀM QUYẾT ĐỊNH CHẤT LƯỢNG (VALIDATION)
 # Nhiệm vụ: Nhận metrics -> trả về True (giữ) hoặc False (loại)
 # ==========================================
-def validate_window(metrics: dict, is_cry_label: bool) -> bool:
+def validate_window(metrics: dict, is_cry_label: bool|None) -> bool:
     """
     Đầu vào: Dict chỉ số từ Tầng 1 và cờ đánh dấu nhãn (True nếu là tiếng bé khóc)
     Đầu ra: bool (True: đạt chuẩn, False: loại)
@@ -93,12 +96,16 @@ def validate_window(metrics: dict, is_cry_label: bool) -> bool:
     # - Cả 2 nhãn đều phải thỏa mãn: không quá bé (MIN_DBFS) và không vỡ tiếng (MAX_CLIP_RATIO)
     # - Nếu is_cry_label == True: kiểm tra thêm snr_db, flatness, cry_band_ratio
     # - Nếu is_cry_label == False (tiếng ồn): có thể nới lỏng flatness/cry_band_ratio để giữ tiếng ồn làm tập âm
-    if metrics["dbfs"] < MIN_DBFS or metrics["clip_ratio"] > MAX_CLIP_RATIO:
+    if metrics["dbfs"] < MIN_DBFS or metrics["clip_ratio"] > MAX_CLIP_RATIO or metrics["flatness"] > MAX_SPECTRAL_FLATNESS:
         return False
-    
-    if is_cry_label:
-        if metrics["snr_db"] < MIN_SNR_DB or metrics["flatness"] > MAX_SPECTRAL_FLATNESS or metrics ["cry_ratio"] < MIN_CRY_BAND_RATIA:
+    if is_cry_label == True:
+        if metrics["snr_db"] < MIN_SNR_DB or metrics ["cry_ratio"] < MIN_CRY_BAND_RATIA:
             return False
+        if metrics["adult_ratio"] > MAX_ADULT_RATIO:
+            return False
+        if metrics["adult_ratio"] >= metrics["cry_ratio"]*0.5:
+            return False
+        
     return True
 
 
@@ -133,21 +140,23 @@ def process_single_file(file_path: pathlib.Path, output_dir: pathlib.Path):
         out_folder = pathlib.Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
         # lỗi đã gặp : Error: cannot access local variable 'intervals' where it is not associated with a value, basicially, error come from empty interval and np.pad, if y_active exist a rmpty interval <=> len < window sample and because it's empty so it will error if we want to pad it 
-        if is_cry:
+        """if is_cry:
             intervals = librosa.effects.split(y=y, top_db=28, frame_length=512, hop_length=256)
             if len(intervals) > 0:
                 y_active = np.concatenate([y[start:end] for start, end in intervals])
             else:
                 y_active = y
         else:
-            y_active = y
-        if len(y_active)< WINDOW_SAMPLE:
-            y_active = np.pad(y_active,(0, WINDOW_SAMPLE-len(y_active)), mode='wrap')
-        for win_index, start in enumerate(range(0, (len(y_active) - WINDOW_SAMPLE + 1) , HOP_SAMPLE), 0):
-            y_win = y_active[start: start+WINDOW_SAMPLE]
+            y_active = y 
+        """
+        if len(y)< WINDOW_SAMPLE:
+            y = np.pad(y,(0, WINDOW_SAMPLE-len(y)), mode='wrap')
+        for win_index, start in enumerate(range(0, (len(y) - WINDOW_SAMPLE + 1) , HOP_SAMPLE), 0):
+            y_win = y[start: start+WINDOW_SAMPLE]
             metrics = calculate_window_metrics(y_win)
             is_valid = validate_window(metrics, is_cry_label=is_cry)
             if is_valid:
+                y_win = librosa.util.normalize(y_win - np.mean(y_win)).astype(np.float32) * 0.95
                 output_file_path = out_folder/f"{file_path.stem}_win{start:06d}_{win_index}{str(file_path.suffix.lower())}"
                 sf.write(str(output_file_path), y_win, TARGET_SR, subtype="PCM_16")
                 record =  {
@@ -183,7 +192,7 @@ def Valid_file(Normalized_input_dir: str, windows_output_dir: str| None = None):
 if __name__ == "__main__":
     try:
         input = r"D:\2026-2027\CryCare\Implementation\output\Normalize"
-        output = r"D:\2026-2027\CryCare\Implementation\output\Validation"
+        output = r"D:\2026-2027\CryCare\Implementation\output\02_Validation"
         Valid_file(input, output)
     except Exception as e:
         print(f"error: {e}")

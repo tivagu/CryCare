@@ -86,41 +86,41 @@ def Exported_Feature(step3_output_dir: str, features_output_dir: str|None = None
     # - Gom X_1d_train, X_2d_train, y_train từ các phần tử có r["split"] == "train"
     # - Gom tương tự cho valid và tes
     X_1d_train =np.stack([i["x_1d"] for  i in Train])
-    X_2d_train = np.stack([i["x_2d"] for i in Train])
+    #X_2d_train = np.stack([i["x_2d"] for i in Train])
     y_train = np.array([i["y"] for i in Train], dtype=np.int64)
     
     X_1d_valid =np.stack([i["x_1d"] for  i in Valid])
-    X_2d_valid = np.stack([i["x_2d"] for i in Valid])
+    #X_2d_valid = np.stack([i["x_2d"] for i in Valid])
     y_valid = np.array([i["y"] for i in Valid], dtype=np.int64)
         
     X_1d_test =np.stack([i["x_1d"] for  i in Test])
-    X_2d_test = np.stack([i["x_2d"] for i in Test])
+    #X_2d_test = np.stack([i["x_2d"] for i in Test])
     y_test = np.array([i["y"] for i in Test], dtype=np.int64)
     
     # 4. CHUẨN HÓA Z-SCORE: Chỉ tính mean và std từ X_2d_train!
     #    mel_mean = float(np.mean(X_2d_train))
     #    mel_std  = float(np.std(X_2d_train) + 1e-8)
     #    Áp dụng công thức (X - mel_mean) / mel_std cho cả train, valid, test!
-    mel_mean = float(np.mean(X_2d_train))
-    mel_std = float(np.std(X_2d_train) + 1e-8)
-    X_2d_train_norm = (X_2d_train - mel_mean)/mel_std
-    X_2d_valid_norm = (X_2d_valid - mel_mean)/mel_std
-    X_2d_test_norm = (X_2d_test-mel_mean)/mel_std
+    #mel_mean = float(np.mean(X_2d_train))
+    #mel_std = float(np.std(X_2d_train) + 1e-8)
+    #X_2d_train_norm = (X_2d_train - mel_mean)/mel_std
+    #X_2d_valid_norm = (X_2d_valid - mel_mean)/mel_std
+    #X_2d_test_norm = (X_2d_test-mel_mean)/mel_std
     # 5. Lưu các mảng nhị phân .npy bằng np.save(...)
     #    np.save(out_dir / "X_train_2d.npy", X_train_2d_norm)
     #    np.save(out_dir / "y_train.npy", y_train)
     #    ...
     np.save(out_dir / "X_train_1d.npy", X_1d_train)
-    np.save(out_dir / "X_train_2d.npy", X_2d_train_norm)
+   # np.save(out_dir / "X_train_2d.npy", X_2d_train_norm)
     np.save(out_dir / "y_train.npy", y_train)
     
     np.save(out_dir / "X_valid_1d.npy", X_1d_valid)
-    np.save(out_dir / "X_valid_2d.npy", X_2d_valid_norm)
+    #np.save(out_dir / "X_valid_2d.npy", X_2d_valid_norm)
     np.save(out_dir / "y_valid.npy", y_valid)
         
     
     np.save(out_dir / "X_test_1d.npy", X_1d_test)
-    np.save(out_dir / "X_test_2d.npy", X_2d_test_norm)
+    #np.save(out_dir / "X_test_2d.npy", X_2d_test_norm)
     np.save(out_dir / "y_test.npy", y_test)
 
     # 6. Lưu file cấu hình DSP để sau này nạp vào firmware C++ trên ESP32
@@ -136,7 +136,7 @@ def Exported_Feature(step3_output_dir: str, features_output_dir: str|None = None
     #    }
     #    with open(out_dir / "esp32_dsp_config.json", "w", encoding="utf-8") as f:
     #        json.dump(dsp_config, f, indent=2)
-    dsp_config = {
+    """dsp_config = {
            "target_sr": 16000,
            "n_fft": 512,
             "hop_length": 160,
@@ -149,6 +149,7 @@ def Exported_Feature(step3_output_dir: str, features_output_dir: str|None = None
     with open(out_dir / "esp32_dsp_config.json", "w", encoding="utf-8") as f:
             json.dump(dsp_config, f, indent=2)
     print(f"Hoàn thành Step 4! Đã lưu đặc trưng vào: {out_dir}")
+    """
     return out_dir
 
 

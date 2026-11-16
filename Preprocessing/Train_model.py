@@ -48,17 +48,20 @@ def train_evaluate(model: BaseLineModel, feature_dir: pathlib.Path|str):
         "confusion_matrix": confusion_matrix(y_true=Y_test, y_pred=Y_predict).tolist()
     }
     
-def Evaluate_Model( feature_dir: pathlib.Path):
+def Evaluate_Model( feature_dir: pathlib.Path, model_dir: pathlib.Path):
     feat_dir = pathlib.Path(feature_dir)
+    model = pathlib.Path(model_dir)
     Log_Model = LogisticModel()
     metrics = train_evaluate(Log_Model, feat_dir)
+    Log_Model.save(model)
     print(metrics)
     
 
 if __name__ == "__main__":
     try:
         FEATURE_FOLDER = r"D:\2026-2027\CryCare\Implementation\output\Feature"
-        Evaluate_Model(FEATURE_FOLDER)
+        MODEL_DIR = r"D:\2026-2027\CryCare\Implementation\output\model"
+        Evaluate_Model(FEATURE_FOLDER, MODEL_DIR)
     except Exception as e:
         print(f"Error: {e}")
     
