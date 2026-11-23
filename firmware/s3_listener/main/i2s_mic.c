@@ -1,11 +1,9 @@
 #include <driver/i2s_std.h>
 #include "i2s_mic.h"
 
-#define GPIO_SCK_BCLK 4 // read-write bit speed
-#define GPIO_WS_LRCK 5 // left/right clock
-#define GPIO_SD_DIN 6 // SD short for serial data
-#define I2S_SAMPLE_RATE 16000
+
 static i2s_chan_handle_t rx_handle = NULL;
+static int32_t raw_buf[I2S_READ_CHUNK_MAX];
 /*Workflow:
 * 1. Create an open key for INMP441 to ESP32-S3 through I2S_MIC_0
 * 2. Config IS2_MIC_0 through key for INMP441 with 16kHZ + 32 bit Mono + GPIO
@@ -35,6 +33,19 @@ esp_err_t i2s_mic_init(){
     return i2s_channel_enable(rx_handle);
 }
 
-esp_err_t i2s_mic_read(){
-
+esp_err_t i2s_mic_read(int16_t *out_sample, size_t num_samples, size_t* sample_read){
+    /*Workflow:
+    * 1. Check whether num_samples == 0 or out_sample == NULL or sample_read == NULLL
+    * 2. Since we need 32.000 Hz for model to analyze, but 32.000 Hz * int16_t = Lots of bytes! -> we use small array instead
+    * 3. We analyze num_samples and sample_read and compute dbfs for total num_samples and return out_sample*/
+    if (out_sample == NULL || sample_read == NULL || num_samples == 0 || num_samples > I2S_READ_CHUNK_MAX) return ESP_ERR_INVALID_ARG;
+    if (rx_handle == NULL) return ESP_ERR_INVALID_STATE;
+    size_t bytes = 0;
+    esp_err_t ret = i2s_channel_read(rx_handle, raw_buf, num_samples * sizeof(int32_t), &bytes, 1000);
+    if(ret != ESP_OK) return ret;
+    *sample_read = (size_t) bytes / sizeof(int32_t);
+    for (int i = 0; i < *sample_read; i++){
+        out_sample[i] = (int16_t) (raw_buf[i] >> 16);
+    }
+    return ESP_OK;
 }
