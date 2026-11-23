@@ -20,4 +20,7 @@ typedef struct __attribute__ ((packed)){ // ask system not to padding the struct
     uint8_t check; // check noise if bitwise | 20 for padding
 }crycare_packet_t; 
 
+
 static_assert(sizeof(crycare_packet_t) == 16, "Packet size must equal to 16 bytes");
+
+bool checksum_xor();

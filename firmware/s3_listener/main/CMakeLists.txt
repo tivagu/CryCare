@@ -1,1 +1,1 @@
-idf_component_register(SRCS "i2s_mic.c" "main.c" INCLUDE_DIRS ".") 
+idf_component_register(SRCS "src/i2s_mic.c" "main.c" "src/espnow_trans.c" INCLUDE_DIRS "include" ".") 
