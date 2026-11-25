@@ -23,4 +23,4 @@ typedef struct __attribute__ ((packed)){ // ask system not to padding the struct
 
 static_assert(sizeof(crycare_packet_t) == 16, "Packet size must equal to 16 bytes");
 
-bool checksum_xor();
+uint8_t checksum_xor(const crycare_packet_t* pkt);

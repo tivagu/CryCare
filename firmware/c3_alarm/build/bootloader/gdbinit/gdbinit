@@ -1,0 +1,2 @@
+source E:/AI_Model/CryCare/firmware/c3_alarm/build/bootloader/gdbinit/symbols
+source E:/AI_Model/CryCare/firmware/c3_alarm/build/bootloader/gdbinit/connect

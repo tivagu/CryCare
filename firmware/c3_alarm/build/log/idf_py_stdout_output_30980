@@ -1,0 +1,8 @@
+Command: ninja all
+[1/4] C:\Windows\system32\cmd.exe /C "cd /D E:\AI_Model\CryCare\firmware\c3_alarm\build && E:\Espressif\tools\python\v6.0.2\venv\Scripts\python.exe E:/Espressif/v6.1/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app E:/AI_Model/CryCare/firmware/c3_alarm/build/partition_table/partition-table.bin E:/AI_Model/CryCare/firmware/c3_alarm/build/c3_alarm.bin"
+c3_alarm.bin binary size 0xc2af0 bytes. Smallest app partition is 0x100000 bytes. 0x3d510 bytes (24%) free.
+[2/4] Performing build step for 'bootloader'
+[1/1] C:\Windows\system32\cmd.exe /C "cd /D E:\AI_Model\CryCare\firmware\c3_alarm\build\bootloader && E:\Espressif\tools\python\v6.0.2\venv\Scripts\python.exe E:/Espressif/v6.1/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 E:/AI_Model/CryCare/firmware/c3_alarm/build/bootloader/bootloader.bin"
+Bootloader binary size 0x52a0 bytes. 0x2d60 bytes (35%) free.
+[3/4] No install step for 'bootloader'
+[4/4] Completed 'bootloader'

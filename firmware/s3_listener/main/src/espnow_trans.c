@@ -11,7 +11,7 @@
 /*Experience: for every .c file, we should add const char *TAG to ESP_LOGI*/
 static const char *TAG = "ESPNOW_TX";
 static const uint8_t C3_MAC[6] = {0xFF, 0xFF, 0xFF,0xFF, 0xFF, 0xFF}; // DEMO
-
+static uint32_t seq = 0;
 static void on_data_sent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status){ // to check whether C3 is earned packet or not
     if (status == ESP_NOW_SEND_SUCCESS){
         ESP_LOGI(TAG, "Sucessfully sent to C3");
@@ -64,11 +64,26 @@ esp_err_t espnow_trans_init(){
     return ESP_OK;
 }
 
-esp_err_t espnow_trans_send(uint8_t conf, int8_t dbfs, uint16_t f0_hz, uint8_t duty_circle){
+esp_err_t espnow_trans_send(uint8_t conf, int8_t dbfs, uint16_t f0_hz, uint8_t duty_cycle){
 /*Workflow:
 * 1. After getting at least 3 Crycare packets -> we immediately send an esp now packet to C3 to alert.
 * 2. However, since baby cry non stop for minutes and wait for mom or someone come -> we need to create a cooldown time after send an alert (stop spamming)
 * 3. People are afraid of scam and mis-understand things. Therefore, after sending -> cooldown activate and only 1 JSON is available*
 * 4. However, we only care about send a packet to C3 through ESP_NOW*/
-
+    crycare_packet_t pkt = {0};
+    pkt.conf = conf;
+    pkt.dbfs = dbfs;
+    pkt.duty_cycle = duty_cycle;
+    pkt.event_type = CRY;
+    pkt.magic_byte = 0xCC;
+    pkt.seq_id = seq;
+    seq++;
+    pkt.f0_hz = f0_hz;
+    pkt.check = checksum_xor(&pkt);
+    esp_err_t check_send = esp_now_send(C3_MAC, (const uint8_t *) &pkt, sizeof(crycare_packet_t));
+    if (check_send != ESP_OK){
+        ESP_LOGE(TAG, "ERROR, CANNOT SEND TO C3");
+        return check_send;
+    }
+    return ESP_OK;
 }

@@ -1,0 +1,41 @@
+Command: E:\Espressif\tools\python\v6.0.2\venv\Scripts\python.exe E:\Espressif\v6.1\esp-idf\tools/idf_monitor.py -p COM4 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c3 --revision 3 --decode-panic backtrace E:\AI_Model\CryCare\firmware\c3_alarm\build\c3_alarm.elf E:\AI_Model\CryCare\firmware\c3_alarm\build\bootloader\bootloader.elf --force-color -m 'E:\Espressif\tools\python\v6.0.2\venv\Scripts\python.exe' 'E:\Espressif\v6.1\esp-idf\tools\idf.py' '-p' 'COM4'
+--- WARNING: GDB cannot open serial ports accessed as COMx
+--- NOTE: Using \\.\COM4 instead...
+--- esp-idf-monitor 1.11.0 on \\.\COM4 115200
+--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H
+--- 0x40385bbc: rv_utils_wait_for_intr at E:/Espressif/v6.1/esp-idf/components/riscv/include/riscv/rv_utils.h:84(inlined by) esp_cpu_wait_for_intr at E:/Espressif/v6.1/esp-idf/components/esp_hw_support/cpu.c:62
+--- 0x403cbf10: esp_bootloader_get_description at E:/Espressif/v6.1/esp-idf/components/esp_bootloader_format/esp_bootloader_desc.c:40
+--- 0x403ce710: is_xmc_chip_strict at E:/Espressif/v6.1/esp-idf/components/bootloader_support/bootloader_flash/src/bootloader_flash.c:911
+--- 0x403cbf1a: call_start_cpu0 at E:/Espressif/v6.1/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+--- ERROR: ClearCommError failed (PermissionError(13, 'The device does not recognize the command.', None, 22))
+--- Waiting for the device to reconnect.
+--- ERROR: ClearCommError failed (PermissionError(13, 'The device does not recognize the command.', None, 22))
+--- Waiting for the device to reconnect.
+--- ERROR: ClearCommError failed (PermissionError(13, 'The device does not recognize the command.', None, 22))
+--- Waiting for the device to reconnect...
+--- ERROR: ClearCommError failed (PermissionError(13, 'The device does not recognize the command.', None, 22))
+--- Waiting for the device to reconnect....--- NOTE: To exit from IDF monitor please use "Ctrl+]". Alternatively, you can use Ctrl+T Ctrl+X to exit.
+..--- NOTE: To exit from IDF monitor please use "Ctrl+]". Alternatively, you can use Ctrl+T Ctrl+X to exit.
+.--- NOTE: To exit from IDF monitor please use "Ctrl+]". Alternatively, you can use Ctrl+T Ctrl+X to exit.
+--- NOTE: To exit from IDF monitor please use "Ctrl+]". Alternatively, you can use Ctrl+T Ctrl+X to exit.
+.--- NOTE: To exit from IDF monitor please use "Ctrl+]". Alternatively, you can use Ctrl+T Ctrl+X to exit.
+--- NOTE: To exit from IDF monitor please use "Ctrl+]". Alternatively, you can use Ctrl+T Ctrl+X to exit.
+......
+
+Traceback (most recent call last):
+  File [35m"E:\Espressif\v6.1\esp-idf\tools/idf_monitor.py"[0m, line [35m11[0m, in [35m<module>[0m
+    sys.exit([31msubprocess.run[0m[1;31m([sys.executable, '-m', 'esp_idf_monitor'] + sys.argv[1:])[0m.returncode)
+             [31m~~~~~~~~~~~~~~[0m[1;31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  File [35m"C:\Users\LENOVO\AppData\Local\Programs\Python\Python313\Lib\subprocess.py"[0m, line [35m556[0m, in [35mrun[0m
+    stdout, stderr = [31mprocess.communicate[0m[1;31m(input, timeout=timeout)[0m
+                     [31m~~~~~~~~~~~~~~~~~~~[0m[1;31m^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  File [35m"C:\Users\LENOVO\AppData\Local\Programs\Python\Python313\Lib\subprocess.py"[0m, line [35m1214[0m, in [35mcommunicate[0m
+    [31mself.wait[0m[1;31m()[0m
+    [31m~~~~~~~~~[0m[1;31m^^[0m
+  File [35m"C:\Users\LENOVO\AppData\Local\Programs\Python\Python313\Lib\subprocess.py"[0m, line [35m1280[0m, in [35mwait[0m
+    return [31mself._wait[0m[1;31m(timeout=timeout)[0m
+           [31m~~~~~~~~~~[0m[1;31m^^^^^^^^^^^^^^^^^[0m
+  File [35m"C:\Users\LENOVO\AppData\Local\Programs\Python\Python313\Lib\subprocess.py"[0m, line [35m1606[0m, in [35m_wait[0m
+    result = _winapi.WaitForSingleObject(self._handle,
+                                         timeout_millis)
+[1;35mKeyboardInterrupt[0m

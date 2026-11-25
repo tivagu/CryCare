@@ -1,0 +1,1 @@
+idf_component_register(SRCS "main.c" "src/receive_from_s3.c" "src/buzzer_volume.c" INCLUDE_DIRS include)
